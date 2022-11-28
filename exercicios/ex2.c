@@ -21,17 +21,35 @@ int **criar_matriz(){
 }
 // void *p
 void *somar(void *p){
+    
     int id = *(int *)p;
-    printf("executando a thread %d\n ",id);
-    // int id= *(int *)p;
-    int inicio = id*dividir; 
-    int fim = (id+1)*dividir;
-    printf("%d %d\n",inicio,fim);
-    for (int i=0;i<linha;i++){
-        for(int j=inicio;j<fim;j++)
-            somatorio[id] += matriz[i][j]; 
-            printf("%d\n",somatorio[id]);
+    int inicio; 
+    int fim;
+    if (linha%NUM_THREADS==0)
+    {
+        inicio = id*dividir;
+        fim = (id+1)*dividir;
+    }else if (linha%NUM_THREADS!=0)
+    {
+        inicio = id*dividir;
+        if (id == NUM_THREADS-1){
+            fim = linha;
+        }else{
+            fim = (id+1)*dividir;
+        }
+        
     }
+    
+    somatorio[id] = 0;
+    printf("thread %d\n",id);
+    for (int i = inicio; i < fim; i++){
+        for (int j = 0; j < coluna; j++){
+            somatorio[id] +=matriz[i][j];
+        }
+        
+    }
+    
+    
 }
 
 void desalocarMatriz(){
@@ -54,6 +72,7 @@ void imprimir(){
 }
 int main()
 {
+    int result=0;
     int ids[NUM_THREADS];
     pthread_t threads[NUM_THREADS];
     pthread_attr_t attr;
@@ -83,7 +102,12 @@ int main()
 
             }
         }
-    printf("o resultado é %d\n",somatorio[0]+somatorio[1]+somatorio[2]);
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        result += somatorio[i];
+    }
+    
+    printf("o resultado é %d\n",result);
     desalocarMatriz();
     return 0;
 }
